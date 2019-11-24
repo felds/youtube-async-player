@@ -1,0 +1,17 @@
+{
+  "name": "wtf-yt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/youtube": "0.0.38",
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {}
+}
