@@ -39,80 +39,77 @@ export class AsyncPlayer {
   private player: Promise<YT.Player>;
 
   constructor(el: HTMLDivElement, options: YT.PlayerOptions = {}) {
-    window.enqueueYouTubeIframeAPIReady(() => {
-      this.player = new Promise((resolve, reject) => {
-        const x = new YT.Player(el, {
+    this.player = new Promise((win, fail) => {
+      window.enqueueYouTubeIframeAPIReady(() => {
+        const player = new YT.Player(el, {
           ...options,
           events: {
-            onReady: () => resolve(x)
+            onReady: () => win()
           }
         });
       });
     });
   }
 
-  // TODO: No need to deregister. The callbacks become unavailable once the promise resolves.
   async play() {
-    const pl = await this.player;
+    return this.player.then(
+      player =>
+        new Promise((win, fail) => {
+          /** @todo is this a win? is this a fail? */
+          if (player.getPlayerState() === YT.PlayerState.PLAYING) win();
 
-    return new Promise((win, fail) => {
-      function detectSuccess({ data: state }: YT.OnStateChangeEvent) {
-        if (state === YT.PlayerState.PLAYING) {
-          win();
-        }
-      }
+          player.addEventListener(
+            "onStateChange",
+            ({ data: state }: YT.OnStateChangeEvent) =>
+              state === YT.PlayerState.PLAYING && win()
+          );
 
-      function detectError({ data }: YT.OnErrorEvent) {
-        fail(translateError(data));
-      }
+          player.addEventListener(
+            "onError",
+            ({ data: error }: YT.OnErrorEvent) =>
+              fail(new Error(translateError(error)))
+          );
 
-      // register callbacks
-      pl.addEventListener("onStateChange", detectSuccess);
-      pl.addEventListener("onError", detectError);
-
-      // do the thing
-      if (pl.getPlayerState() === YT.PlayerState.PLAYING) {
-        /** @todo is this a win? is this a fail? */
-        win(); // already playing. skip.
-      } else {
-        pl.playVideo();
-      }
-    });
+          player.playVideo();
+        })
+    );
   }
 
-  /**
-   * @todo when does it fail? what happens when it fails?
-   */
   async pause() {
-    return this.player.then(player => {
-      if (player.getPlayerState() === YT.PlayerState.PAUSED) {
-        return;
-      }
+    return this.player.then(
+      player =>
+        new Promise((win, fail) => {
+          /** @todo is this a win? is this a fail? */
+          if (player.getPlayerState() === YT.PlayerState.PAUSED) win();
 
-      return new Promise(win => {
-        const stuff = (e: YT.OnStateChangeEvent) => {
-          // success
-          if (e.data === YT.PlayerState.PAUSED) {
-            player.removeEventListener("onStateChange", stuff);
-            win();
-          }
-        };
-        player.addEventListener("onStateChange", stuff);
-        player.pauseVideo();
-      });
-    });
+          player.addEventListener(
+            "onStateChange",
+            ({ data: state }: YT.OnStateChangeEvent) =>
+              state === YT.PlayerState.PAUSED && win()
+          );
+
+          player.addEventListener(
+            "onError",
+            ({ data: error }: YT.OnErrorEvent) =>
+              fail(new Error(translateError(error)))
+          );
+
+          player.pauseVideo();
+        })
+    );
   }
 }
 
 export namespace AsyncPlayer {
   /**
-   * Original errors from the docs:
+   * Translates the original errors from youtube API to domain errors.
    *
-   * 2 – The request contains an invalid parameter value. For example, this error occurs if you specify a video ID that does not have 11 characters, or if the video ID contains invalid characters, such as exclamation points or asterisks.
-   * 5 – The requested content cannot be played in an HTML5 player or another error related to the HTML5 player has occurred.
-   * 100 – The video requested was not found. This error occurs when a video has been removed (for any reason) or has been marked as private.
-   * 101 – The owner of the requested video does not allow it to be played in embedded players.
-   * 150 – This error is the same as 101. It's just a 101 error in disguise!
+   * Original errors from the docs:
+   * 2    – The request contains an invalid parameter value. For example, this error occurs if you specify a video ID that does not have 11 characters, or if the video ID contains invalid characters, such as exclamation points or asterisks.
+   * 5    – The requested content cannot be played in an HTML5 player or another error related to the HTML5 player has occurred.
+   * 100  – The video requested was not found. This error occurs when a video has been removed (for any reason) or has been marked as private.
+   * 101  – The owner of the requested video does not allow it to be played in embedded players.
+   * 150  – This error is the same as 101. It's just a 101 error in disguise!
    */
   export enum Errors {
     INVALID_PARAMETER = "Invalid parameter",
