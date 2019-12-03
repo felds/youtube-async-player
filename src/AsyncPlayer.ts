@@ -7,10 +7,10 @@ class AsyncPlayer {
   constructor(el: HTMLDivElement, options: YT.PlayerOptions = {}) {
     this.player = new Promise((win, fail) => {
       window.enqueueYouTubeIframeAPIReady(() => {
-        const player = new YT.Player(el, {
+        const player: YT.Player = new YT.Player(el, {
           ...options,
           events: {
-            onReady: () => win()
+            onReady: () => win(player)
           }
         });
       });
