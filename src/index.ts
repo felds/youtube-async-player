@@ -1,4 +1,4 @@
-import { AsyncPlayer } from "./youtube";
+import AsyncPlayer from "./AsyncPlayer";
 
 declare const root: HTMLDivElement;
 declare const play: HTMLButtonElement;

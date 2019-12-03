@@ -1,41 +1,7 @@
-// add yt script
-const tag = document.createElement("script");
-tag.src = "https://www.youtube.com/iframe_api";
-document.body.appendChild(tag);
+import "./util/youtube";
+import { translateError } from "./util/error";
 
-// on ready callbacks
-type Callback = () => void;
-declare global {
-  interface Window {
-    onYouTubeIframeAPIReady(): void;
-    enqueueYouTubeIframeAPIReady(callback: Callback): void;
-  }
-}
-let isReady = false;
-const callbacks: Callback[] = [];
-window.onYouTubeIframeAPIReady = () => {
-  isReady = true;
-  callbacks.forEach(callback => callback());
-};
-window.enqueueYouTubeIframeAPIReady = callback => {
-  if (isReady) {
-    callback();
-  } else {
-    callbacks.push(callback);
-  }
-};
-
-function translateError(err: YT.PlayerError): AsyncPlayer.Errors {
-  return {
-    2: AsyncPlayer.Errors.INVALID_PARAMETER,
-    5: AsyncPlayer.Errors.HTML5_ERROR,
-    100: AsyncPlayer.Errors.VIDEO_NOT_FOUND,
-    101: AsyncPlayer.Errors.EMBED_DISABLED,
-    150: AsyncPlayer.Errors.EMBED_DISABLED
-  }[err];
-}
-
-export class AsyncPlayer {
+class AsyncPlayer {
   private player: Promise<YT.Player>;
 
   constructor(el: HTMLDivElement, options: YT.PlayerOptions = {}) {
@@ -100,7 +66,7 @@ export class AsyncPlayer {
   }
 }
 
-export namespace AsyncPlayer {
+namespace AsyncPlayer {
   /**
    * Translates the original errors from youtube API to domain errors.
    *
@@ -118,3 +84,5 @@ export namespace AsyncPlayer {
     EMBED_DISABLED = "Embed disabled by the author"
   }
 }
+
+export default AsyncPlayer;
