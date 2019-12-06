@@ -73,6 +73,10 @@ class AsyncPlayer {
         })
     );
   }
+
+  get playing() {
+    return this.player.then(p => p.getPlayerState() === YT.PlayerState.PLAYING);
+  }
 }
 
 namespace AsyncPlayer {
