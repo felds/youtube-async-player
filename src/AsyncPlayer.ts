@@ -7,12 +7,21 @@ type AsyncPlayerOptions = YT.PlayerOptions & {
   videoUrl?: string;
 };
 
+enum AsyncPlayerEvents {
+  UNSTARTED = "playing",
+  ENDED = "ended",
+  PLAYING = "playing",
+  PAUSED = "paused",
+  BUFFERING = "buffering",
+  CUED = "cued"
+}
+
 class AsyncPlayer {
   private player: Promise<YT.Player>;
-  public eventEmitter: EventEmitter;
+  public eventEmitter: EventEmitter<AsyncPlayerEvents>;
 
   constructor(el: HTMLDivElement, options: AsyncPlayerOptions = {}) {
-    this.eventEmitter = new EventEmitter();
+    this.eventEmitter = new EventEmitter<AsyncPlayerEvents>();
 
     this.player = new Promise((win, fail) => {
       const videoId = options.videoUrl
@@ -39,12 +48,12 @@ class AsyncPlayer {
       ({ data }: YT.OnStateChangeEvent) => {
         this.eventEmitter.emit(
           {
-            [YT.PlayerState.UNSTARTED]: "unstarted",
-            [YT.PlayerState.ENDED]: "ended",
-            [YT.PlayerState.PLAYING]: "playing",
-            [YT.PlayerState.PAUSED]: "paused",
-            [YT.PlayerState.BUFFERING]: "buffering",
-            [YT.PlayerState.CUED]: "cued"
+            [YT.PlayerState.UNSTARTED]: AsyncPlayerEvents.UNSTARTED,
+            [YT.PlayerState.ENDED]: AsyncPlayerEvents.ENDED,
+            [YT.PlayerState.PLAYING]: AsyncPlayerEvents.PLAYING,
+            [YT.PlayerState.PAUSED]: AsyncPlayerEvents.PAUSED,
+            [YT.PlayerState.BUFFERING]: AsyncPlayerEvents.BUFFERING,
+            [YT.PlayerState.CUED]: AsyncPlayerEvents.CUED
           }[data]
         );
       }
