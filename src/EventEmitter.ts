@@ -27,7 +27,10 @@ export default class EventEmitter {
 
   off(event: string, fn?: Function): void {
     this.handlers = this.handlers.filter(
-      handler => handler.event !== event || handler.fn !== fn
+      handler =>
+        fn
+          ? handler.event !== event || handler.fn !== fn // specific handler
+          : handler.event !== event // all handlers for an event
     );
   }
 
