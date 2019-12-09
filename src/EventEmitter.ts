@@ -1,31 +1,31 @@
-type EventHandler = {
-  event: string;
+type EventHandler<T> = {
+  event: T;
   fn: Function;
   once: boolean;
 };
 
-export default class EventEmitter {
-  private handlers: EventHandler[] = [];
+export default class EventEmitter<Event> {
+  private handlers: EventHandler<Event>[] = [];
 
-  on(event: string, fn: Function): void {
+  on(event: Event, fn: Function): void {
     this.handlers.push({ event, fn, once: false });
   }
 
-  once(event: string, fn: Function): void {
+  once(event: Event, fn: Function): void {
     this.handlers.push({ event, fn, once: true });
   }
 
   /**
    * Deregister all handlers for the given event.
    */
-  off(event: string): void;
+  off(event: Event): void;
 
   /**
    * Deregister an specific handler for the given event.
    */
-  off(event: string, handler: Function): void;
+  off(event: Event, handler: Function): void;
 
-  off(event: string, fn?: Function): void {
+  off(event: Event, fn?: Function): void {
     this.handlers = this.handlers.filter(
       handler =>
         fn
@@ -34,7 +34,7 @@ export default class EventEmitter {
     );
   }
 
-  emit(event: string, ...args: any) {
+  emit(event: Event, ...args: any) {
     this.handlers
       .filter(handler => handler.event === event)
       .forEach(handler => {
