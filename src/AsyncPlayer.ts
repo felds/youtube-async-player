@@ -7,21 +7,13 @@ type AsyncPlayerOptions = YT.PlayerOptions & {
   videoUrl?: string;
 };
 
-enum AsyncPlayerEvents {
-  UNSTARTED = "playing",
-  ENDED = "ended",
-  PLAYING = "playing",
-  PAUSED = "paused",
-  BUFFERING = "buffering",
-  CUED = "cued"
-}
-
 class AsyncPlayer {
   private player: Promise<YT.Player>;
-  public eventEmitter: EventEmitter<AsyncPlayerEvents>;
+
+  public readonly eventEmitter: EventEmitter<AsyncPlayer.Events>;
 
   constructor(el: HTMLDivElement, options: AsyncPlayerOptions = {}) {
-    this.eventEmitter = new EventEmitter<AsyncPlayerEvents>();
+    this.eventEmitter = new EventEmitter<AsyncPlayer.Events>();
 
     this.player = new Promise((win, fail) => {
       const videoId = options.videoUrl
@@ -35,8 +27,8 @@ class AsyncPlayer {
             onReady: () => {
               this._addEventListeners(player);
               win(player);
-            }
-          }
+            },
+          },
         });
       });
     });
@@ -48,15 +40,15 @@ class AsyncPlayer {
       ({ data }: YT.OnStateChangeEvent) => {
         this.eventEmitter.emit(
           {
-            [YT.PlayerState.UNSTARTED]: AsyncPlayerEvents.UNSTARTED,
-            [YT.PlayerState.ENDED]: AsyncPlayerEvents.ENDED,
-            [YT.PlayerState.PLAYING]: AsyncPlayerEvents.PLAYING,
-            [YT.PlayerState.PAUSED]: AsyncPlayerEvents.PAUSED,
-            [YT.PlayerState.BUFFERING]: AsyncPlayerEvents.BUFFERING,
-            [YT.PlayerState.CUED]: AsyncPlayerEvents.CUED
-          }[data]
+            [YT.PlayerState.UNSTARTED]: AsyncPlayer.Events.UNSTARTED,
+            [YT.PlayerState.ENDED]: AsyncPlayer.Events.ENDED,
+            [YT.PlayerState.PLAYING]: AsyncPlayer.Events.PLAYING,
+            [YT.PlayerState.PAUSED]: AsyncPlayer.Events.PAUSED,
+            [YT.PlayerState.BUFFERING]: AsyncPlayer.Events.BUFFERING,
+            [YT.PlayerState.CUED]: AsyncPlayer.Events.CUED,
+          }[data],
         );
-      }
+      },
     );
   }
 
@@ -70,17 +62,17 @@ class AsyncPlayer {
           player.addEventListener(
             "onStateChange",
             ({ data: state }: YT.OnStateChangeEvent) =>
-              state === YT.PlayerState.PLAYING && win()
+              state === YT.PlayerState.PLAYING && win(),
           );
 
           player.addEventListener(
             "onError",
             ({ data: error }: YT.OnErrorEvent) =>
-              fail(new Error(translateError(error)))
+              fail(new Error(translateError(error))),
           );
 
           player.playVideo();
-        })
+        }),
     );
   }
 
@@ -94,17 +86,17 @@ class AsyncPlayer {
           player.addEventListener(
             "onStateChange",
             ({ data: state }: YT.OnStateChangeEvent) =>
-              state === YT.PlayerState.PAUSED && win()
+              state === YT.PlayerState.PAUSED && win(),
           );
 
           player.addEventListener(
             "onError",
             ({ data: error }: YT.OnErrorEvent) =>
-              fail(new Error(translateError(error)))
+              fail(new Error(translateError(error))),
           );
 
           player.pauseVideo();
-        })
+        }),
     );
   }
 
@@ -128,7 +120,16 @@ namespace AsyncPlayer {
     INVALID_PARAMETER = "Invalid parameter",
     HTML5_ERROR = "HTML5 error",
     VIDEO_NOT_FOUND = "Video not found",
-    EMBED_DISABLED = "Embed disabled by the author"
+    EMBED_DISABLED = "Embed disabled by the author",
+  }
+
+  export enum Events {
+    UNSTARTED = "playing",
+    ENDED = "ended",
+    PLAYING = "playing",
+    PAUSED = "paused",
+    BUFFERING = "buffering",
+    CUED = "cued",
   }
 }
 
