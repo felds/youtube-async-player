@@ -46,9 +46,9 @@ class AsyncPlayer {
             [YT.PlayerState.PAUSED]: AsyncPlayer.Events.PAUSED,
             [YT.PlayerState.BUFFERING]: AsyncPlayer.Events.BUFFERING,
             [YT.PlayerState.CUED]: AsyncPlayer.Events.CUED,
-          }[data],
+          }[data]
         );
-      },
+      }
     );
   }
 
@@ -62,17 +62,17 @@ class AsyncPlayer {
           player.addEventListener(
             "onStateChange",
             ({ data: state }: YT.OnStateChangeEvent) =>
-              state === YT.PlayerState.PLAYING && win(),
+              state === YT.PlayerState.PLAYING && win()
           );
 
           player.addEventListener(
             "onError",
             ({ data: error }: YT.OnErrorEvent) =>
-              fail(new Error(translateError(error))),
+              fail(new Error(translateError(error)))
           );
 
           player.playVideo();
-        }),
+        })
     );
   }
 
@@ -86,17 +86,17 @@ class AsyncPlayer {
           player.addEventListener(
             "onStateChange",
             ({ data: state }: YT.OnStateChangeEvent) =>
-              state === YT.PlayerState.PAUSED && win(),
+              state === YT.PlayerState.PAUSED && win()
           );
 
           player.addEventListener(
             "onError",
             ({ data: error }: YT.OnErrorEvent) =>
-              fail(new Error(translateError(error))),
+              fail(new Error(translateError(error)))
           );
 
           player.pauseVideo();
-        }),
+        })
     );
   }
 

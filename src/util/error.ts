@@ -6,6 +6,6 @@ export function translateError(err: YT.PlayerError): AsyncPlayer.Errors {
     5: AsyncPlayer.Errors.HTML5_ERROR,
     100: AsyncPlayer.Errors.VIDEO_NOT_FOUND,
     101: AsyncPlayer.Errors.EMBED_DISABLED,
-    150: AsyncPlayer.Errors.EMBED_DISABLED
+    150: AsyncPlayer.Errors.EMBED_DISABLED,
   }[err];
 }
