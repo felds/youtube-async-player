@@ -1,6 +1,7 @@
 import "./util/youtube";
 import { translateError } from "./util/error";
 import { idFromURL } from "./util/string";
+import EventEmitter from "./EventEmitter";
 
 type AsyncPlayerOptions = YT.PlayerOptions & {
   videoUrl?: string;
@@ -8,8 +9,11 @@ type AsyncPlayerOptions = YT.PlayerOptions & {
 
 class AsyncPlayer {
   private player: Promise<YT.Player>;
+  public eventEmitter: EventEmitter;
 
   constructor(el: HTMLDivElement, options: AsyncPlayerOptions = {}) {
+    this.eventEmitter = new EventEmitter();
+
     this.player = new Promise((win, fail) => {
       const videoId = options.videoUrl
         ? idFromURL(options.videoUrl)
@@ -19,11 +23,32 @@ class AsyncPlayer {
           ...options,
           videoId,
           events: {
-            onReady: () => win(player)
+            onReady: () => {
+              this._addEventListeners(player);
+              win(player);
+            }
           }
         });
       });
     });
+  }
+
+  private _addEventListeners(player: YT.Player): void {
+    player.addEventListener(
+      "onStateChange",
+      ({ data }: YT.OnStateChangeEvent) => {
+        this.eventEmitter.emit(
+          {
+            [YT.PlayerState.UNSTARTED]: "unstarted",
+            [YT.PlayerState.ENDED]: "ended",
+            [YT.PlayerState.PLAYING]: "playing",
+            [YT.PlayerState.PAUSED]: "paused",
+            [YT.PlayerState.BUFFERING]: "buffering",
+            [YT.PlayerState.CUED]: "cued"
+          }[data]
+        );
+      }
+    );
   }
 
   async play() {
