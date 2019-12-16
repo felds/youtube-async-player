@@ -103,6 +103,10 @@ class AsyncPlayer {
   get playing() {
     return this.player.then(p => p.getPlayerState() === YT.PlayerState.PLAYING);
   }
+
+  get paused() {
+    return this.player.then(p => p.getPlayerState() === YT.PlayerState.PAUSED);
+  }
 }
 
 namespace AsyncPlayer {
