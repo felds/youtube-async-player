@@ -1,24 +1,23 @@
 import "./util/youtube";
 import { translateError } from "./util/error";
-import { idFromURL } from "./util/string";
+import { getId } from "./util/string";
 import EventEmitter from "./EventEmitter";
 
 type AsyncPlayerOptions = YT.PlayerOptions & {
-  videoUrl?: string;
+  video?: string;
 };
 
 class AsyncPlayer {
   private player: Promise<YT.Player>;
 
   public readonly eventEmitter: EventEmitter<AsyncPlayer.Events>;
+  // public readonly data: Promise<>;
 
   constructor(el: HTMLDivElement, options: AsyncPlayerOptions = {}) {
     this.eventEmitter = new EventEmitter<AsyncPlayer.Events>();
 
     this.player = new Promise((win, fail) => {
-      const videoId = options.videoUrl
-        ? idFromURL(options.videoUrl)
-        : options.videoId;
+      const videoId = options.video ? getId(options.video) : options.videoId;
       window.enqueueYouTubeIframeAPIReady(() => {
         const player: YT.Player = new YT.Player(el, {
           ...options,
